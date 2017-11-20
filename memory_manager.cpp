@@ -1,5 +1,6 @@
 #include "memory_manager.h"
 #include <iostream>
+#include <vector>
 
 /******************************************************
  *  main
@@ -269,23 +270,44 @@ void release(int pid){
  */
 void print(std::ofstream &output_file){
 
-  // keep count for display as the iterator in the loop
-  // will jump through all of the memory locations
-  int count = 1;
+  int i;
+  int j;
+  int value;
+  int tmp;
 
-  for(int i = 0; i < NUM_BLOCKS; ) {
+  std::vector<int> indexes;
 
-    // output record
-    output_file << "AllocatedMemBlock " << count << std::endl;
-    output_file << DISPLAY_INDENT << "Process Id = " << memory[i]->ProcessId << std::endl;
-    output_file << DISPLAY_INDENT << "MemBlocks = " << memory[i]->MemBlocks << std::endl;
-    output_file << DISPLAY_INDENT << "MemorySize = " << memory[i]->MemorySize << std::endl;
+  for(i = 0; i < NUM_BLOCKS; ) {
+
+    // add the index of the memory array to
+    // the vector
+    indexes.push_back(i);
 
     // add our jump
     i += memory[i]->MemBlocks;
+  }
 
-    // increment our count for display
-    count ++;
+  // insertion sort to sort our vector based on 
+  // the number of memory blocks
+  for(i = 0; i < indexes.size(); i++ ) {
+    tmp = indexes[i];
+    j = i;
+
+    while(j > 0 && memory[indexes[j]]->MemBlocks > memory[tmp]->MemBlocks) {
+      indexes[j] = indexes[j-1];
+      --j;
+    }
+    indexes[j] = tmp;
+  }
+
+  // write sorted output to output_file
+  for(i = 0; i < indexes.size(); i++ ) {
+
+    // output record
+    output_file << "AllocatedMemBlock " << (i + 1) << std::endl;
+    output_file << DISPLAY_INDENT << "Process Id = " << memory[indexes[i]]->ProcessId << std::endl;
+    output_file << DISPLAY_INDENT << "MemBlocks = " << memory[indexes[i]]->MemBlocks << std::endl;
+    output_file << DISPLAY_INDENT << "MemorySize = " << memory[indexes[i]]->MemorySize << std::endl;
   }
 
   // add a line break after each print call
