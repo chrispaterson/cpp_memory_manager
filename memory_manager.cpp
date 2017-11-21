@@ -25,6 +25,8 @@ int main() {
 /*
  * chunks through the input file and generates the
  * output file
+ * @param memory     reference to array of unique pointers
+ *                   that is a simulation of memory
  *
  */
 void processFile(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory) {
@@ -120,6 +122,8 @@ void processFile(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > 
  *
  * @param pid        process id to label it
  * @param amount     amount of memory needed
+ * @param memory     reference to array of unique pointers
+ *                   that is a simulation of memory
  *
  */
 void allocate(int pid, int amount, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
@@ -237,6 +241,8 @@ void allocate(int pid, int amount, std::array< std::unique_ptr< AllocatedMemBloc
  * releases "memory"
  *
  * @param pid        process id to release
+ * @param memory     reference to array of unique pointers
+ *                   that is a simulation of memory
  *
  */
 void release(int pid, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
@@ -269,6 +275,8 @@ void release(int pid, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOC
  * writes to specified file current state of "memory"
  *
  * @param output_file  file to write to
+ * @param memory     reference to array of unique pointers
+ *                   that is a simulation of memory
  *
  */
 void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
@@ -336,6 +344,8 @@ void stop(std::ifstream &input_file, std::ofstream &output_file){
 /*
  * clears the memory array by
  * resetting all of the pointers
+ * @param memory     reference to array of unique pointers
+ *                   that is a simulation of memory
  *
  */
 void reboot(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
@@ -361,6 +371,8 @@ void reboot(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memo
 /*
  * Creates process with all the memory
  * 'free' that can be used.
+ * @param memory     reference to array of unique pointers
+ *                   that is a simulation of memory
  *
  */
 void allocate_initial_block(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory) {
