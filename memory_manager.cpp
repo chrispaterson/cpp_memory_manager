@@ -275,7 +275,6 @@ void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMem
 
   int i;
   int j;
-  int value;
   int tmp;
 
   std::vector<int> indexes;
