@@ -1,17 +1,20 @@
 #include "memory_manager.h"
 #include <iostream>
 #include <vector>
+#include <cstdlib>
 
 /******************************************************
  *  main
  ******************************************************/
 int main() {
 
+  std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > memory;
+
   // Create our initial empty process
-  allocate_initial_block();
+  allocate_initial_block(memory);
 
   // process input file and write output file
-  processFile();
+  processFile(memory);
 
   return EXIT_SUCCESS;
 }
@@ -24,7 +27,7 @@ int main() {
  * output file
  *
  */
-void processFile() {
+void processFile(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory) {
 
   // input and output file streams
   std::ifstream input_file(INPUT_FILE_NAME);
@@ -53,7 +56,7 @@ void processFile() {
           // A = allocate memory block
           case 'A':
 
-            allocate(pid, memory_amount);
+            allocate(pid, memory_amount, memory);
             break;
 
             // P = write all the AllocatedMemBlock’s to
@@ -61,13 +64,13 @@ void processFile() {
             // largest in size.
           case 'P':
 
-            print(output_file);
+            print(output_file, memory);
             break;
 
             // R = release memory block
           case 'R':
 
-            release(pid);
+            release(pid, memory);
             break;
 
             // S = stops the simulation
@@ -81,7 +84,7 @@ void processFile() {
             // of contiguous memory is available.
           case 'Z':
 
-            reboot();
+            reboot(memory);
             break;
 
             // if there is an unknown action code
@@ -119,7 +122,7 @@ void processFile() {
  * @param amount     amount of memory needed
  *
  */
-void allocate(int pid, int amount){
+void allocate(int pid, int amount, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
 
   // gets number of full blocks
   int memBlocks = amount / BLOCK_SIZE;
@@ -236,7 +239,7 @@ void allocate(int pid, int amount){
  * @param pid        process id to release
  *
  */
-void release(int pid){
+void release(int pid, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
 
   // loop through each block looking for processId
   for(int i = 0; i < NUM_BLOCKS; ) {
@@ -268,7 +271,7 @@ void release(int pid){
  * @param output_file  file to write to
  *
  */
-void print(std::ofstream &output_file){
+void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
 
   int i;
   int j;
@@ -336,7 +339,7 @@ void stop(std::ifstream &input_file, std::ofstream &output_file){
  * resetting all of the pointers
  *
  */
-void reboot(){
+void reboot(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
 
   // loop through all the blocks
   for(int i = 0; i < NUM_BLOCKS; ) {
@@ -353,7 +356,7 @@ void reboot(){
   }
 
   // setup for a clean slate
-  allocate_initial_block();
+  allocate_initial_block(memory);
 }
 
 /*
@@ -361,7 +364,7 @@ void reboot(){
  * 'free' that can be used.
  *
  */
-void allocate_initial_block() {
+void allocate_initial_block(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory) {
 
   // create our unique_ptr with pointer with new struct value
   memory[0] = std::unique_ptr<AllocatedMemBlock>(new AllocatedMemBlock);
@@ -371,3 +374,5 @@ void allocate_initial_block() {
   memory[0]->MemBlocks = NUM_BLOCKS;
   memory[0]->MemorySize = NUM_BLOCKS * BLOCK_SIZE;
 }
+
+

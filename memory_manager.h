@@ -24,22 +24,6 @@ const unsigned int UNUSED_PID = 0;
 const std::string DISPLAY_INDENT = "   ";
 
 /******************************************************
- *  Global Variables
- ******************************************************/
-// it should be mentioned that I created this here because
-// if this were a class this would of course be private
-// variable that I could access within the scope of my
-// class, however because we aren't allowed to use classes
-// I'm forced to use a global variable here.  I could of 
-// course make a method to return the value but I think 
-// that, in this case would be ugly.
-//
-// this array is the modeled memory that I will use each
-// index as a BLOCK_SIZE chunk of memory.
-
-std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > memory;
-
-/******************************************************
  *  function prototypes
  ******************************************************/
 /*
@@ -47,7 +31,7 @@ std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > memory;
  * output file
  *
  */
-void processFile();
+void processFile(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory);
 
 /*
  * allocates "memory" from our array by using the "best fit"
@@ -57,7 +41,7 @@ void processFile();
  * @param amount     amount of memory needed
  *
  */
-void allocate(int pid, int amount);
+void allocate(int pid, int amount, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory);
 
 /*
  * releases "memory" 
@@ -65,7 +49,7 @@ void allocate(int pid, int amount);
  * @param pid        process id to release
  *
  */
-void release(int pid);
+void release(int pid, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory);
 
 /*
  * writes to specified file current state of "memory" 
@@ -73,7 +57,7 @@ void release(int pid);
  * @param output_file  file to write to
  *
  */
-void print(std::ofstream &output_file);
+void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory);
 
 /*
  * Close and exit the program 
@@ -88,11 +72,11 @@ void stop(std::ifstream &input_file, std::ofstream &output_file);
  * clears the memory
  *
  */
-void reboot();
+void reboot(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory);
 
 /*
  * Creates process with 'free' id that
  * can be used.
  *
  */
-void allocate_initial_block();
+void allocate_initial_block(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory);
