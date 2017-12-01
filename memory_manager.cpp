@@ -14,7 +14,7 @@ int main() {
   allocate_initial_block(memory);
 
   // process input file and write output file
-  processFile(memory);
+  process_file(memory);
 
   return EXIT_SUCCESS;
 }
@@ -29,7 +29,7 @@ int main() {
  *                   that is a simulation of memory
  *
  */
-void processFile(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory) {
+void process_file(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory) {
 
   // input and output file streams
   std::ifstream input_file(INPUT_FILE_NAME);

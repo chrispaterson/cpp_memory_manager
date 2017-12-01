@@ -33,7 +33,7 @@ const std::string DISPLAY_INDENT = "   ";
  *                   that is a simulation of memory
  *
  */
-void processFile(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory);
+void process_file(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory);
 
 /*
  * allocates "memory" from our array by using the "best fit"
