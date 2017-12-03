@@ -305,7 +305,7 @@ void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMem
     tmp = indexes.at(i);
     q = i;
 
-    while(j > 0 && memory.at(indexes.at(q))->MemBlocks > memory.at(tmp)->MemBlocks) {
+    while(q > 0 && memory.at(indexes.at(q))->MemBlocks > memory.at(tmp)->MemBlocks) {
       indexes.at(q) = indexes.at(q-1);
       --q;
     }
