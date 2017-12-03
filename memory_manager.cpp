@@ -1,12 +1,12 @@
 #include "memory_manager.h"
 #include <iostream>
-#include <vector>
 #include <cstdlib>
 
 /******************************************************
  *  main
  ******************************************************/
 int main() {
+
 
   std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > memory;
 
@@ -159,11 +159,11 @@ void allocate(int pid, int amount, std::array< std::unique_ptr< AllocatedMemBloc
   for(int i = 0; i < NUM_BLOCKS; ){
 
     // we have a 'free' location
-    if(memory[i]->ProcessId == UNUSED_PID) {
+    if(memory.at(i)->ProcessId == UNUSED_PID) {
 
       // we have an unused process id, let's get our
       // number of available blocks at this location
-      int availableBlocksHere = memory[i]->MemBlocks;
+      int availableBlocksHere = memory.at(i)->MemBlocks;
 
       // if we have more blocks than we need, if not
       // this memory will not fit here.
@@ -198,7 +198,7 @@ void allocate(int pid, int amount, std::array< std::unique_ptr< AllocatedMemBloc
     }
 
     // skip ahead to the next pointer that has a value
-    i += memory[i]->MemBlocks;
+    i += memory.at(i)->MemBlocks;
   }
 
   // if we have found at least one place to allocate the
@@ -215,24 +215,24 @@ void allocate(int pid, int amount, std::array< std::unique_ptr< AllocatedMemBloc
       // move unused portion block back
 
       // create a new pointer for unused bit
-      memory[idx + memBlocks] = std::unique_ptr<AllocatedMemBlock>(new AllocatedMemBlock);
+      memory.at(idx + memBlocks) = std::unique_ptr<AllocatedMemBlock>(new AllocatedMemBlock);
 
       // set to the 'free' process id
-      memory[idx + memBlocks]->ProcessId = UNUSED_PID;
+      memory.at(idx + memBlocks)->ProcessId = UNUSED_PID;
 
       // new memblocks size is the the old minus the chunk
       // of new process memory we're using
-      memory[idx + memBlocks]->MemBlocks = memory[idx]->MemBlocks - memBlocks;
+      memory.at(idx + memBlocks)->MemBlocks = memory.at(idx)->MemBlocks - memBlocks;
 
       // our use maximum amount of memory per block of 'free
       // memory
-      memory[idx + memBlocks]->MemorySize = memory[idx + memBlocks]->MemBlocks * BLOCK_SIZE;
+      memory.at(idx + memBlocks)->MemorySize = memory.at(idx + memBlocks)->MemBlocks * BLOCK_SIZE;
     }
 
     // update to some new values
-    memory[idx]->ProcessId = pid;
-    memory[idx]->MemBlocks = memBlocks;
-    memory[idx]->MemorySize = amount;
+    memory.at(idx)->ProcessId = pid;
+    memory.at(idx)->MemBlocks = memBlocks;
+    memory.at(idx)->MemorySize = amount;
 
   }
 }
@@ -251,16 +251,16 @@ void release(int pid, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOC
   for(int i = 0; i < NUM_BLOCKS; ) {
 
     // capture our jump
-    int jump = memory[i]->MemBlocks;
+    int jump = memory.at(i)->MemBlocks;
 
     // if we found our process id
-    if(pid == memory[i]->ProcessId) {
+    if(pid == memory.at(i)->ProcessId) {
 
       // reset it to pid 0 making it available to write over
-      memory[i]->ProcessId = 0;
+      memory.at(i)->ProcessId = 0;
 
       // set memory to maximum value (it's really just free memory)
-      memory[i]->MemorySize = memory[i]->MemBlocks * BLOCK_SIZE;
+      memory.at(i)->MemorySize = memory.at(i)->MemBlocks * BLOCK_SIZE;
 
       // we found it, therefore no need to continue on this loop
       break;
@@ -283,41 +283,44 @@ void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMem
 
   int i;
   int j;
+  int q;
   int tmp;
 
-  std::vector<int> indexes;
+  std::array<int, NUM_BLOCKS> indexes = {-1};
 
-  for(i = 0; i < NUM_BLOCKS; ) {
+  for(i = 0, j = 0; i < NUM_BLOCKS; j++) {
 
     // add the index of the memory array to
     // the vector
-    indexes.push_back(i);
+    indexes.at(j) = i;
 
     // add our jump
-    i += memory[i]->MemBlocks;
+    i += memory.at(i)->MemBlocks;
   }
 
-  // insertion sort to sort our vector based on 
+
+  // insertion sort to sort our vector based on
   // the number of memory blocks
-  for(i = 0; i < indexes.size(); i++ ) {
-    tmp = indexes[i];
-    j = i;
+  for(i = 0; i < j; i++ ) {
+    tmp = indexes.at(i);
+    q = i;
 
-    while(j > 0 && memory[indexes[j]]->MemBlocks > memory[tmp]->MemBlocks) {
-      indexes[j] = indexes[j-1];
-      --j;
+    while(j > 0 && memory.at(indexes.at(q))->MemBlocks > memory.at(tmp)->MemBlocks) {
+      indexes.at(q) = indexes.at(q-1);
+      --q;
     }
-    indexes[j] = tmp;
+    indexes.at(q) = tmp;
   }
+
 
   // write sorted output to output_file
-  for(i = 0; i < indexes.size(); i++ ) {
+  for(i = 0; i < j; i++ ) {
 
     // output record
     output_file << "AllocatedMemBlock " << (i + 1) << std::endl;
-    output_file << DISPLAY_INDENT << "Process Id = " << memory[indexes[i]]->ProcessId << std::endl;
-    output_file << DISPLAY_INDENT << "MemBlocks = " << memory[indexes[i]]->MemBlocks << std::endl;
-    output_file << DISPLAY_INDENT << "MemorySize = " << memory[indexes[i]]->MemorySize << std::endl;
+    output_file << DISPLAY_INDENT << "Process Id = " << memory.at(indexes.at(i))->ProcessId << std::endl;
+    output_file << DISPLAY_INDENT << "MemBlocks = " << memory.at(indexes.at(i))->MemBlocks << std::endl;
+    output_file << DISPLAY_INDENT << "MemorySize = " << memory.at(indexes.at(i))->MemorySize << std::endl;
   }
 
   // add a line break after each print call
@@ -355,10 +358,10 @@ void reboot(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memo
 
     // capture our jump amount to the next
     // allocated chunk
-    int jump = memory[i]->MemBlocks;
+    int jump = memory.at(i)->MemBlocks;
 
     // reset unique_ptr
-    memory[i].reset();
+    memory.at(i).reset();
 
     // add jump amount to the next block
     i += jump;
@@ -378,12 +381,12 @@ void reboot(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memo
 void allocate_initial_block(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory) {
 
   // create our unique_ptr with pointer with new struct value
-  memory[0] = std::unique_ptr<AllocatedMemBlock>(new AllocatedMemBlock);
+  memory.at(0) = std::unique_ptr<AllocatedMemBlock>(new AllocatedMemBlock);
 
   // fills values with defaults and maxes
-  memory[0]->ProcessId = UNUSED_PID;
-  memory[0]->MemBlocks = NUM_BLOCKS;
-  memory[0]->MemorySize = NUM_BLOCKS * BLOCK_SIZE;
+  memory.at(0)->ProcessId = UNUSED_PID;
+  memory.at(0)->MemBlocks = NUM_BLOCKS;
+  memory.at(0)->MemorySize = NUM_BLOCKS * BLOCK_SIZE;
 }
 
 
