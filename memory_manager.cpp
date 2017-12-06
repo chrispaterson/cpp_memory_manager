@@ -111,6 +111,11 @@ void process_file(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS >
         }
       }
 
+      // if there is no stop command in the input file
+      // we'll stop the simulation if it gets through
+      // the whole file.
+      stop(input_file, output_file);
+
     } else {
 
       // problem openeing input file
