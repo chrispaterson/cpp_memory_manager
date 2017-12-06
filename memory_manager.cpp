@@ -1,3 +1,12 @@
+/*
+ * @Author Chris Paterson
+ *
+ * @Project C++ Memory Manager Simulation - Programming Assignment #5
+ *
+ */
+
+
+
 #include "memory_manager.h"
 #include <iostream>
 #include <cstdlib>
