@@ -325,16 +325,17 @@ void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMem
   }
 
   // insertion sort to sort our vector based on
-  // the number of memory blocks
+  // the memory size
   for(i = 0; i < indexes.size(); i++ ) {
+
     tmp = indexes.at(i);
     j = i;
-
 
     while(j > 0 && memory.at(indexes.at(j - 1))->MemorySize > memory.at(tmp)->MemorySize) {
       indexes[j] = indexes.at(j-1);
       --j;
     }
+
     indexes[j] = tmp;
   }
 
