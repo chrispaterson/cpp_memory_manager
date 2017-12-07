@@ -1,7 +1,8 @@
 /*
- * @Author Chris Paterson
+ * @Project CS M10A Programming Assignment #5
+ *          Memory Manager Simulation
  *
- * @Project C++ Memory Manager Simulation - Programming Assignment #5
+ * @Author Chris Paterson
  *
  */
 
@@ -10,6 +11,7 @@
 #include "memory_manager.h"
 #include <iostream>
 #include <cstdlib>
+#include <vector>
 
 /******************************************************
  *  main
@@ -52,9 +54,9 @@ void process_file(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS >
 
         // variables for reading from each line of
         // the input file
-        char action;
-        int pid;
-        int memory_amount;
+        char action = 0;
+        int pid = 0;
+        int memory_amount = 0;
 
         // read the input values into the variables
         input_file >> action;
@@ -84,10 +86,13 @@ void process_file(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS >
             release(pid, memory);
             break;
 
+            // 0 in case someone forgets a stop function
+            // and we have no characters
+          case 0 :
             // S = stops the simulation
           case 'S':
 
-            stop(input_file, output_file);
+            stop(input_file, output_file, EXIT_SUCCESS);
             break;
 
             // Z = simulates a reboot of the computer.
@@ -100,13 +105,12 @@ void process_file(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS >
 
             // if there is an unknown action code
             // that messes up so we exit with a fail
+
           default:
 
             // close files, print error and exit
-            input_file.close();
-            output_file.close();
             std::cerr << "Invalid input in " << INPUT_FILE_NAME << " unable to proceed. I can do nothing with action code: " << action << std::endl;
-            exit(EXIT_FAILURE);
+            stop(input_file, output_file, EXIT_FAILURE);
             break;
         }
       }
@@ -114,7 +118,7 @@ void process_file(std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS >
       // if there is no stop command in the input file
       // we'll stop the simulation if it gets through
       // the whole file.
-      stop(input_file, output_file);
+      stop(input_file, output_file, EXIT_SUCCESS);
 
     } else {
 
@@ -295,40 +299,47 @@ void release(int pid, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOC
  */
 void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMemBlock >, NUM_BLOCKS > &memory){
 
-  int i;
-  int j;
-  int q;
-  int tmp;
+  unsigned int i;
+  unsigned int j;
+  unsigned int tmp;
 
-  std::array<int, NUM_BLOCKS> indexes = {-1};
+  // Create a vector to push the indexes of the actual
+  // locations of blocks of AllocatedMemBlocks
+  std::vector<int> indexes;
 
-  for(i = 0, j = 0; i < NUM_BLOCKS; j++) {
+  // there could be up to NUM_BLOCKS so reserve that to
+  // start since we know that's the largest it will 
+  // ever be that way the vector doesn't have to 
+  // copy itself
+  indexes.reserve(NUM_BLOCKS);
+
+  // loop through num_blocks skipping empty ones
+  for(i = 0; i < NUM_BLOCKS; ) {
 
     // add the index of the memory array to
     // the vector
-    indexes.at(j) = i;
+    indexes.push_back(i);
 
     // add our jump
     i += memory.at(i)->MemBlocks;
   }
 
-
   // insertion sort to sort our vector based on
   // the number of memory blocks
-  for(i = 0; i < j; i++ ) {
+  for(i = 0; i < indexes.size(); i++ ) {
     tmp = indexes.at(i);
-    q = i;
+    j = i;
 
-    while(q > 0 && memory.at(indexes.at(q))->MemBlocks > memory.at(tmp)->MemBlocks) {
-      indexes.at(q) = indexes.at(q-1);
-      --q;
+
+    while(j > 0 && memory.at(indexes.at(j - 1))->MemorySize > memory.at(tmp)->MemorySize) {
+      indexes[j] = indexes.at(j-1);
+      --j;
     }
-    indexes.at(q) = tmp;
+    indexes[j] = tmp;
   }
 
-
   // write sorted output to output_file
-  for(i = 0; i < j; i++ ) {
+  for(i = 0; i < indexes.size(); i++ ) {
 
     // output record
     output_file << "AllocatedMemBlock " << (i + 1) << std::endl;
@@ -346,16 +357,17 @@ void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMem
  *
  * @param output_file  file to close
  * @param input_file   file to close
+ * @param exit_status  status to return to the exit command
  *
  */
-void stop(std::ifstream &input_file, std::ofstream &output_file){
+void stop(std::ifstream &input_file, std::ofstream &output_file, int exit_status){
 
   //close files
   input_file.close();
   output_file.close();
 
   // exit program
-  exit(EXIT_SUCCESS);
+  exit(exit_status);
 }
 
 /*

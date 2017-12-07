@@ -72,9 +72,10 @@ void print(std::ofstream &output_file, std::array< std::unique_ptr< AllocatedMem
  *
  * @param output_file  file to close
  * @param input_file   file to close
+ * @param exit_status  status to return to the exit command
  *
  */
-void stop(std::ifstream &input_file, std::ofstream &output_file);
+void stop(std::ifstream &input_file, std::ofstream &output_file, int exit_status);
 
 /*
  * clears the memory
